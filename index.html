@@ -48,6 +48,7 @@
 					<h2>Why should you care?</h2>
 					<p>No more hook_boot</p>
 					<p>No more hook_init</p>
+					<p>No more hook_exit</p>
 				</section>
 
 				<section>
@@ -67,7 +68,28 @@
 					</section>
 
 					<section>
-						[code example]
+						<pre><code>
+public function submitForm(array &$form, FormStateInterface $form_state) {
+	$name = $form_state->getValue('name');
+	$email = $form_state->getValue('email');
+
+	$container = Drupal::getContainer();
+
+	$mailer = $container->get('plugin.manager.mail');
+	$mailer->mail('example', 'signup_form', $email, .... ['name' => $name]);
+
+	$crm_manager = $container->get('crm.manager');
+	$crm_manager->subscribe($name, $email);
+
+	$mailchimp_manager = $container->get('mailchimp.manager');
+	$mailchimp_manager->add($name, $email);
+
+	$twitter_manager = $container->get('twitter.manager');
+	$tweet = new ThisIsGettingRidiculous();
+	$tweet->setMessage('blah blah ' . $name . ' blah blah');
+	$twitter_manager->tweet($tweet);
+}
+</code></pre>
 					</section>
 
 					<section>
@@ -98,24 +120,44 @@
 						<h2>Dispatching an event</h2>
 						<ul>
 							<li>Extend the event class</li>
-							<li>Inject the event dispatcher into your class</li>
 							<li>Dispatch the event</li>
 						</ul>
 					</section>
 
 					<section>
 						<h2>Extend the event class</h2>
-						[code sample]
-					</section>
+						<pre><code>
+use Symfony\Component\EventDispatcher\Event;
 
-					<section>
-						<h2>Inject the event dispatcher into the class</h2>
-						[code sample]
+class SignupFormEvent extends Event {
+
+  protected $name;
+  protected $email;
+
+	public function __construct($name, $email) {
+		$this->name = $name;
+		$this->email = $email;
+	}
+
+	public function getName() { return $this->name; }
+	public function getEmail() { return $this->email; }
+}
+						</code></pre>
 					</section>
 
 					<section>
 						<h2>Dispatch the event</h2>
-						[code sample]
+						<pre><code>
+public function submitForm(array &$form, FormStateInterface $form_state) {
+	$name = $form_state->getValue('name');
+	$email = $form_state->getValue('email');
+
+	$event = new SignupFormEvent($name, $email);
+
+	$dispatcher = Drupal::service('event_dispatcher');
+  $dispatcher->dispatch('module_name.signup_form, $event);
+}
+						</code></pre>
 					</section>
 				</section>
 
@@ -130,18 +172,38 @@
 					</section>
 
 					<section>
-						<h2>Implement EventSubscriberInterface</h2>
-						[code sample]
+						<h2>services.yaml</h2>
+						<pre><code>
+services:
+	example_module.signup_form_subscriber:
+	class: Drupal\example_module\EventSubscriber\SignUpFormSubscriber
+	tags:
+		- { name: event_subscriber }
+						</code></pre>
 					</section>
 
 					<section>
-						<h2>services.yaml</h2>
-						[code sample]
+						<h2>Implement EventSubscriberInterface</h2>
+						<pre><code>
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+class SignUpFormSubscriber implements EventSubscriberInterface {
+	public static function getSubscribedEvents() {
+		$events['module_name.signup_form'][] = array('crmRegister', 0);
+		$events['module_name.signup_form'][] = array('mailChimpSubcribe', 0);
+		$events['module_name.signup_form'][] = array('twitterSignup', 0);
+		return $events;
+	}
+}
+						</code></pre>
 					</section>
 
 					<section>
 						<h2>getSubscribers</h2>
-						[code sample]
+						<pre><code>
+public function crmRegister($event) {
+	$this->crmManager->subscribe($event->getName(), $event->getEmail());
+}
+						</code></pre>
 					</section>
 				</section>
 
