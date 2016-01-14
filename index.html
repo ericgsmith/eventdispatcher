@@ -143,6 +143,9 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
               <li>Extend the event class</li>
               <li>Dispatch the event</li>
             </ul>
+            <aside>You have a module, doing something, you want to tell the world about it.
+            Maybe it needs to be altered. Maybe its your own code and you need to keep it
+            clean and tidy.</aside>
           </section>
 
           <section>
@@ -154,7 +157,7 @@ final class ExampleModuleEvents {
   const SIGNUP_FORM_SUBMIT = 'module_name.signup_form_submit';
 }
             </code></pre>
-            <aside class="notes">This doesn't do anything... Used for docs / console</aside>
+            <aside class="notes">This doesn't do anything... Used for docs / console. Remember how we had modulename.api</aside>
           </section>
 
           <section>
@@ -206,6 +209,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
               <li>Implement EventSubscriberInterface</li>
               <li>Implement getSubscribers method</li>
             </ul>
+            <aside>Now to recieve. Remember we are using the container aware dispatcher.</aside>
           </section>
 
           <section>
