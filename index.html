@@ -34,6 +34,9 @@
         <section>
           <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
           <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a></p>
+          <aside class="notes">
+            Intro / see how many people are using d8.
+          </aside>
         </section>
 
         <section>
@@ -49,11 +52,21 @@
           <p>No more hook_boot</p>
           <p>No more hook_init</p>
           <p>No more hook_exit</p>
+          <aside class="notes">
+            A lot of invoked hooks are gone. Might be completely gone for D9.
+          </aside>
         </section>
 
         <section>
           <section>
-            <h2>What is it / why it's useful</h2>
+            <h2>Events</h2>
+            <blockquote cite="https://en.wikipedia.org/wiki/Event_(computing)">
+              <p>... an event is an action or occurrence recognised by software that may be handled by the software.</p>
+            </blockquote>
+            <aside class="notes">
+              Think javascript. Responding to events is something we often do.
+              These events can be anything.
+            </aside>
           </section>
 
           <section>
@@ -103,25 +116,35 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
           </section>
 
           <section>
-            <h2>Events</h2>
-            <blockquote cite="https://en.wikipedia.org/wiki/Event_(computing)">
-              <p>... an event is an action or occurrence recognised by software that may be handled by the software.</p>
-            </blockquote>
-          </section>
-
-          <section>
             <h2>Symfony Event Dispatcher</h2>
             <img src="gatwick.jpg" />
           </section>
+          <aside class="notes">
+            Example of the mediator design pattern.
+            Object the encapsulates the communication of other objects.
+            Mediator promotes loose coupling by keeping objects from referring to each other explicitly
+          </aside>
         </section>
 
         <section>
           <section>
             <h2>Dispatching an event</h2>
             <ul>
+              <li>Static event class</li>
               <li>Extend the event class</li>
               <li>Dispatch the event</li>
             </ul>
+          </section>
+
+          <section>
+            <h2>The Static Events Class</h2>
+            <pre><code>
+final class ExampleModuleEvents {
+
+  /** docBlock */
+  const SIGNUP_FORM_SUBMIT = 'module_name.signup_form_submit';
+}
+            </code></pre>
           </section>
 
           <section>
@@ -146,17 +169,6 @@ class SignupFormEvent extends Event {
           </section>
 
           <section>
-            <h2>... what core is also doing</h2>
-            <pre><code>
-final class ExampleModuleEvents {
-
-  /** docBlock */
-  const SIGNUP_FORM_SUBMIT = 'module_name.signup_form_submit';
-}
-            </code></pre>
-          </section>
-
-          <section>
             <h2>Dispatch the event</h2>
             <pre><code>
 public function submitForm(array &$form, FormStateInterface $form_state) {
@@ -167,6 +179,9 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 
   $dispatcher = Drupal::service('event_dispatcher');
   $dispatcher->dispatch(ExampleModuleEvents::SIGNUP_FORM_SUBMIT, $event);
+
+  // do something with the data
+  // $event->getName();
 }
             </code></pre>
           </section>
@@ -176,8 +191,8 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
           <section>
             <h2>Listen for events</h2>
             <ul>
-              <li>Implement EventSubscriberInterface</li>
               <li>Add to services.yaml</li>
+              <li>Implement EventSubscriberInterface</li>
               <li>Implement getSubscribers method</li>
             </ul>
           </section>
@@ -188,6 +203,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 services:
   example_crm_module.crm_subscriber:
   class: Drupal\example_crm_module\EventSubscriber\CRMSubscriber
+  arguments: ['@crm_manager']
   tags:
     - { name: event_subscriber }
             </code></pre>
@@ -199,6 +215,12 @@ services:
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CRMSubscriber implements EventSubscriberInterface {
+  protected $crmManager;
+
+  public function __construct($crmManager) {
+    $this->crmManager = $crmManager;
+  };
+
   public static function getSubscribedEvents() {
     $events['module_name.signup_form'][] = array('crmRegister', 0);
     return $events;
@@ -213,6 +235,8 @@ class CRMSubscriber implements EventSubscriberInterface {
             <pre><code>
 public function crmRegister($event) {
   $this->crmManager->subscribe($event->getName(), $event->getEmail());
+
+  // $event->stopPropagation();
 }
             </code></pre>
           </section>
