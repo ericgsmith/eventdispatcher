@@ -53,7 +53,9 @@
           <p>No more hook_init</p>
           <p>No more hook_exit</p>
           <aside class="notes">
+            Hook system - one of the first things we learn about drupal.
             A lot of invoked hooks are gone. Might be completely gone for D9.
+            replaced by the event dispatcher.
           </aside>
         </section>
 
@@ -120,6 +122,8 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
             <img src="gatwick.jpg" />
           </section>
           <aside class="notes">
+            A component - drupal is more modern and component based.
+            Component - a bit of functionality we can use.
             Example of the mediator design pattern.
             Object the encapsulates the communication of other objects.
             Mediator promotes loose coupling by keeping objects from referring to each other explicitly
@@ -147,6 +151,7 @@ final class ExampleModuleEvents {
   const SIGNUP_FORM_SUBMIT = 'module_name.signup_form_submit';
 }
             </code></pre>
+            <aside class="notes">This doesn't do anything... Used for docs / console</aside>
           </section>
 
           <section>
@@ -186,6 +191,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
   // $event->getName();
 }
             </code></pre>
+            <aside class="notes">Optionally do something with the data</aside>
           </section>
         </section>
 
