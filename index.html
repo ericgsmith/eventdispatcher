@@ -15,14 +15,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
     <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+    <link rel="stylesheet" href="css/theme/league.css" id="theme">
 
     <!-- Code syntax highlighting -->
-    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <link rel="stylesheet" href="lib/styles/github.css">
 
     <!--[if lt IE 9]>
     <script src="lib/js/html5shiv.js"></script>
     <![endif]-->
+
+      <style>
+          pre,
+          code {
+              padding: 0!important;
+              width: 100%!important;
+              margin: 0!important;
+          }
+      </style>
   </head>
 
   <body>
@@ -32,19 +41,36 @@
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
         <section>
-          <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
-          <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a></p>
-          <aside class="notes">
-            Intro / see how many people are using d8.
-          </aside>
+            <section>
+                <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
+                <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a></p>
+                <aside class="notes">
+                    Intro / see how many people are using d8.
+                </aside>
+            </section>
+
+            <section>
+                <h3>Harry Potter and the Symfony Event Dispatcher</h3>
+                <img src="" />
+            </section>
+            <section>
+                <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
+                <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a></p>
+            </section>
+
         </section>
 
+            <section>
+                <ol>
+                    <li>What is it / why it's useful</li>
+                    <li>Sending an event</li>
+                    <li>Responding to an event</li>
+                </ol>
+        </section>
+
+
         <section>
-          <ul>
-            <li>What is it / why it's useful</li>
-            <li>Sending an event</li>
-            <li>Responding to an event</li>
-          </ul>
+            <h2>Detour 1: About me</h2>
         </section>
 
         <section>
@@ -71,38 +97,43 @@
             </aside>
           </section>
 
+            <section>
+                <h2>Events</h2>
+                <blockquote><p>Something happened</p></blockquote>
+                <aside class="notes">To see why its useful lets look at what we might have done</aside>
+            </section>
+
           <section>
             <h2>What we might have done</h2>
             <p>We have a form that collects a name and email address.</p>
             <ul>
               <li>Send an email to the user</li>
+                <li>Log the submission</li>
               <li>Add the user to our CRM</li>
               <li>Add the user to our newsletter</li>
               <li>Tweet their details to the company fridge</li>
             </ul>
+              <aside class="notes">
+                  .. and thats just what we know now that we want to do.
+              </aside>
           </section>
 
           <section>
-            <pre><code>
+            <pre><code data-trim class="php">
 public function submitForm(array &$form, FormStateInterface $form_state) {
   $name = $form_state->getValue('name');
   $email = $form_state->getValue('email');
 
-  $container = Drupal::getContainer();
+  $this->mailer->mail('example', 'signup_form', $email, .... ['name' => $name]);
 
-  $mailer = $container->get('plugin.manager.mail');
-  $mailer->mail('example', 'signup_form', $email, .... ['name' => $name]);
+  $this->logger->log('notice', 'Registration of interest submitted...');
 
-  $crm_manager = $container->get('crm.manager');
-  $crm_manager->subscribe($name, $email);
+  $this->crmManager->subscribe($name, $email);
 
-  $mailchimp_manager = $container->get('mailchimp.manager');
-  $mailchimp_manager->add($name, $email);
+  $this->mailChimpSubscriptionManager->add($name, $email);
 
-  $twitter_manager = $container->get('twitter.manager');
-  $tweet = new ThisIsGettingRidiculous();
-  $tweet->setMessage('blah blah ' . $name . ' blah blah');
-  $twitter_manager->tweet($tweet);
+  $tweet = TweetFactory::create('blah blah ' . $name . ' blah blah');
+  $this->tweeter->tweet($tweet);
 }
 </code></pre>
           </section>
@@ -111,11 +142,15 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
             <h2>This is bad</h2>
             <ul>
               <li>Form class is doing too many things</li>
-              <li>Tightly coupled</li>
+              <li>Form close knows too many things</li>
               <li>Hard to maintain</li>
               <li>Harder to reuse</li>
             </ul>
           </section>
+
+            <section>
+                Depenency graph
+            </section>
 
           <section>
             <h2>Symfony Event Dispatcher</h2>
@@ -133,24 +168,55 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
               3 step process - listen, notify, execute.
             </aside>
           </section>
+
+            <section>
+                Updated dependency graph
+            </section>
+        </section>
+
+        <section>
+            <section>
+                <h2>Detour 2: Service container</h2>
+            </section>
+
+            <section>
+                <h2>Service:</h2>
+            </section>
+
+            <section>
+                <h2>Dependency Injection:</h2>
+            </section>
+
+            <section>
+                <h2>How it works:</h2>
+                <div class="one-third">
+                    <h3>Configuration</h3>
+                </div>
+                <div class="one-third">
+                    <h3>Magic</h3><img src="magic.gif" />
+                </div>
+                <div class="one-third">
+                    <h3>Service Container</h3>
+                </div>
+            </section>
         </section>
 
         <section>
           <section>
             <h2>Dispatching an event</h2>
-            <ul>
+            <ol>
               <li>Static event class</li>
               <li>Extend the event class</li>
               <li>Dispatch the event</li>
-            </ul>
-            <aside>You have a module, doing something, you want to tell the world about it.
+            </ol>
+            <aside class="notes">You have a module, doing something, you want to tell the world about it.
             Maybe it needs to be altered. Maybe its your own code and you need to keep it
             clean and tidy.</aside>
           </section>
 
           <section>
             <h2>The Static Events Class</h2>
-            <pre><code>
+            <pre><code data-trim class="php">
 final class ExampleModuleEvents {
 
   /** docBlock */
@@ -162,7 +228,7 @@ final class ExampleModuleEvents {
 
           <section>
             <h2>Extend the event class</h2>
-            <pre><code>
+            <pre><code data-trim class="php">
 use Symfony\Component\EventDispatcher\Event;
 
 class SignupFormEvent extends Event {
@@ -183,22 +249,46 @@ class SignupFormEvent extends Event {
 
           <section>
             <h2>Dispatch the event</h2>
-            <pre><code>
+            <pre><code data-trim class="php">
 public function submitForm(array &$form, FormStateInterface $form_state) {
   $name = $form_state->getValue('name');
   $email = $form_state->getValue('email');
 
   $event = new SignupFormEvent($name, $email);
 
-  $dispatcher = Drupal::service('event_dispatcher');
-  $dispatcher->dispatch(ExampleModuleEvents::SIGNUP_FORM_SUBMIT, $event);
-
-  // do something with the data
-  // $event->getName();
+  $this->eventDispatcher->dispatch(ExampleModuleEvents::SIGNUP_FORM_SUBMIT, $event);
 }
             </code></pre>
-            <aside class="notes">Optionally do something with the data</aside>
+            <aside class="notes"></aside>
           </section>
+        </section>
+
+        <section>
+            <section>
+                <h2>Detour 3: Forms</h2>
+            </section>
+            <section>
+                <h2>FormBase</h2>
+                <ul>
+                    <li>implements FormInterface</li>
+                    <li>implements ContainerInjectionInterface</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>ContainerInjectionInterface</h2>
+                constructer / propoerty code sample
+            </section>
+
+            <section>
+                <h2>ContainerInjectionInterface</h2>
+                constructer / propoerty code sample with create method
+            </section>
+
+            <section>
+                <h2>FormInterface</h2>
+                buildForm example
+            </section>
         </section>
 
         <section>
@@ -209,15 +299,15 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
               <li>Implement EventSubscriberInterface</li>
               <li>Implement getSubscribers method</li>
             </ul>
-            <aside>Now to recieve. Remember we are using the container aware dispatcher.</aside>
+            <aside class="notes">Now to recieve. Remember we are using the container aware dispatcher.</aside>
           </section>
 
           <section>
             <h2>services.yaml</h2>
-            <pre><code>
+            <pre><code data-trim class="yaml">
 services:
   example_crm_module.crm_subscriber:
-  class: Drupal\example_crm_module\EventSubscriber\CRMSubscriber
+  class: "Drupal\example_crm_module\EventSubscriber\CRMSubscriber"
   arguments: ['@crm_manager']
   tags:
     - { name: event_subscriber }
@@ -226,7 +316,7 @@ services:
 
           <section>
             <h2>Implement EventSubscriberInterface</h2>
-            <pre><code>
+            <pre><code data-trim class="php">
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CRMSubscriber implements EventSubscriberInterface {
@@ -247,19 +337,34 @@ class CRMSubscriber implements EventSubscriberInterface {
           </section>
 
           <section>
-            <pre><code>
+            <pre><code data-trim class="php">
 public function crmRegister($event) {
   $this->crmManager->subscribe($event->getName(), $event->getEmail());
-
-  // $event->stopPropagation();
 }
             </code></pre>
           </section>
         </section>
 
         <section>
+            <h2>Why is this good?</h2>
+            srp, open / closed, dependency inversion
+        </section>
+
+        <section>
+            <h2>What is Core doing...</h2>
+            <ul>
+                <li>hook_entity_save, delete, etc</li>
+                <li>hook_block_view, etc</li>
+                <li>hook_cron</li>
+                <li>hook_install</li>
+                <li>hook_preprocess</li>
+            </ul>
+        </section>
+
+        <section>
           <h2>What is Core doing...</h2>
           <ul>
+              <li>Responses</li>
             <li>ConfigEvents::DELETE, IMPORT, SAVE..</li>
             <li>EntityTypeEvents::CREATE, UPDATE, DELETE..</li>
             <li>KernelEvents::REQUEST, RESPONSE, TERMINATE..</li>
@@ -268,14 +373,7 @@ public function crmRegister($event) {
         </section>
 
         <section>
-          <h2>What is Core doing...</h2>
-          <ul>
-            <li>hook_entity_save, delete, etc</li>
-            <li>hook_block_view, etc</li>
-            <li>hook_cron</li>
-            <li>hook_install</li>
-            <li>hook_preprocess</li>
-          </ul>
+            <h2>Bonus good stuff - chain of responsibility</h2>
         </section>
 
         <section>
