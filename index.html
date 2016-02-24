@@ -31,6 +31,10 @@
               width: 100%!important;
               margin: 0!important;
           }
+
+        li {
+          white-space: nowrap;
+        }
       </style>
   </head>
 
@@ -47,15 +51,6 @@
                 <aside class="notes">
                     Intro / see how many people are using d8.
                 </aside>
-            </section>
-
-            <section>
-                <h3>Harry Potter and the Symfony Event Dispatcher</h3>
-                <img src="" />
-            </section>
-            <section>
-                <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
-                <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a></p>
             </section>
 
         </section>
@@ -141,15 +136,15 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
           <section>
             <h2>This is bad</h2>
             <ul>
-              <li>Form class is doing too many things</li>
-              <li>Form close knows too many things</li>
+              <li>Submit method is doing too many things</li>
+              <li>Form class knows too many things</li>
               <li>Hard to maintain</li>
-              <li>Harder to reuse</li>
+              <li>Hard to reuse</li>
             </ul>
           </section>
 
             <section>
-                Depenency graph
+                <img src="form%20dep%20graph.svg" />
             </section>
 
           <section>
@@ -170,7 +165,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
           </section>
 
             <section>
-                Updated dependency graph
+                <img src="after%20graph.svg" />
             </section>
         </section>
 
@@ -181,23 +176,57 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 
             <section>
                 <h2>Service:</h2>
+              <blockquote>
+                <p>Any PHP object that performs some sort of "global" task.</p>
+                <small><cite><a href="http://symfony.com/doc/current/book/service_container.html">http://symfony.com/doc/current/book/service_container.html</a></cite></small>
+              </blockquote>
             </section>
 
-            <section>
-                <h2>Dependency Injection:</h2>
-            </section>
+          <section>
+            <h2>Dependency Injection:</h2>
+            <p>Inject dependencies.</p>
+          </section>
+
+          <section>
+            <h2>Not Dependency Injection:</h2>
+            <pre><code data-trim class="php">
+public function myMethod() {
+  $mailer = new Mailhandler();
+  $mailer->send('This is bad.');
+}
+              </code></pre>
+          </section>
+
+          <section>
+            <h2>Dependency Injection:</h2>
+            <pre><code data-trim class="php">
+protected $mailer;
+
+public function __construct(MailHandlerInterface $mailer) {
+  $this->mailer = $mailer;
+}
+
+public function myMethod() {
+  $this->mailer->send('This is better.');
+}
+            </code></pre>
+          </section>
 
             <section>
                 <h2>How it works:</h2>
-                <div class="one-third">
-                    <h3>Configuration</h3>
+              <div style="display: flex; flex-flow: row; justify-content: space-around;">
+                <div style="width:33%">
+                  <h3>Configuration</h3>
+                  <img src="config.png" />
                 </div>
-                <div class="one-third">
-                    <h3>Magic</h3><img src="magic.gif" />
+                <div style="width:33%">
+                  <h3>Magic</h3><img src="magic.gif" style="max-width: 100%;" />
                 </div>
-                <div class="one-third">
-                    <h3>Service Container</h3>
+                <div style="width:33%">
+                  <h3>Service Container</h3>
+                  <img src="sc.svg" />
                 </div>
+              </div>
             </section>
         </section>
 
@@ -270,24 +299,46 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
             <section>
                 <h2>FormBase</h2>
                 <ul>
-                    <li>implements FormInterface</li>
-                    <li>implements ContainerInjectionInterface</li>
+                    <li>Implements FormInterface</li>
+                    <li>Implements ContainerInjectionInterface</li>
                 </ul>
             </section>
 
             <section>
                 <h2>ContainerInjectionInterface</h2>
-                constructer / propoerty code sample
+            <pre><code data-trim class="php">
+public static function create(ContainerInterface $container) {
+  return new static();
+}
+            </code></pre>
             </section>
 
             <section>
                 <h2>ContainerInjectionInterface</h2>
-                constructer / propoerty code sample with create method
+            <pre><code data-trim class="php">
+protected $mailHandler;
+
+public function __construct(MailHandlerInterface $mail_handler) {
+  $this->mailHandler = $mail_handler;
+}
+
+public static function create(ContainerInterface $container) {
+  return new static(
+    $container->get('mailhandler')
+  );
+}
+            </code></pre>
             </section>
 
             <section>
                 <h2>FormInterface</h2>
-                buildForm example
+            <pre><code data-trim class="php">
+public function buildForm(array $form, FormStateInterface $form_state);
+
+public function validateForm(array &$form, FormStateInterface $form_state);
+
+public function submitForm(array &$form, FormStateInterface $form_state);
+            </code></pre>
             </section>
         </section>
 
@@ -347,7 +398,11 @@ public function crmRegister($event) {
 
         <section>
             <h2>Why is this good?</h2>
-            srp, open / closed, dependency inversion
+          <ul>
+            <li>Single Responsibility Principle</li>
+            <li>Open / Closed</li>
+            <li>Dependency Inversion</li>
+          </ul>
         </section>
 
         <section>
@@ -364,7 +419,6 @@ public function crmRegister($event) {
         <section>
           <h2>What is Core doing...</h2>
           <ul>
-              <li>Responses</li>
             <li>ConfigEvents::DELETE, IMPORT, SAVE..</li>
             <li>EntityTypeEvents::CREATE, UPDATE, DELETE..</li>
             <li>KernelEvents::REQUEST, RESPONSE, TERMINATE..</li>
@@ -373,7 +427,7 @@ public function crmRegister($event) {
         </section>
 
         <section>
-            <h2>Bonus good stuff - chain of responsibility</h2>
+            Add video.
         </section>
 
         <section>
