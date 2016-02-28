@@ -27,7 +27,7 @@
       <style>
           pre,
           code {
-              padding: 0!important;
+              padding: 20px!important;
               width: 100%!important;
               margin: 0!important;
           }
@@ -262,16 +262,16 @@ use Symfony\Component\EventDispatcher\Event;
 
 class SignupFormEvent extends Event {
 
-  protected $name;
-  protected $email;
+  protected $submittedName;
+  protected $submittedEmail;
 
   public function __construct($name, $email) {
-    $this->name = $name;
-    $this->email = $email;
+    $this->submittedName = $name;
+    $this->submittedEmail = $email;
   }
 
-  public function getName() { return $this->name; }
-  public function getEmail() { return $this->email; }
+  public function getSubmittedName() { return $this->submittedName; }
+  public function getSubmittedEmail() { return $this->submittedEmail; }
 }
             </code></pre>
           </section>
@@ -316,15 +316,15 @@ public static function create(ContainerInterface $container) {
             <section>
                 <h2>ContainerInjectionInterface</h2>
             <pre><code data-trim class="php">
-protected $mailHandler;
+protected $eventDispatcher;
 
-public function __construct(MailHandlerInterface $mail_handler) {
-  $this->mailHandler = $mail_handler;
+public function __construct(EventDispatcherInterface $eventDispatcher) {
+  $this->eventDispatcher = $eventDispatcher;
 }
 
 public static function create(ContainerInterface $container) {
   return new static(
-    $container->get('mailhandler')
+    $container->get('event_dispatcher')
   );
 }
             </code></pre>
@@ -357,9 +357,9 @@ public function submitForm(array &$form, FormStateInterface $form_state);
             <h2>services.yaml</h2>
             <pre><code data-trim class="yaml">
 services:
-  example_crm_module.crm_subscriber:
-  class: "Drupal\example_crm_module\EventSubscriber\CRMSubscriber"
-  arguments: ['@crm_manager']
+  example_module.registration_mailer:
+  class: "Drupal\example_crm_module\EventSubscriber\RegistrationMailer"
+  arguments: ["@plugin.manager.mail", "@language_manager"]
   tags:
     - { name: event_subscriber }
             </code></pre>
@@ -370,30 +370,40 @@ services:
             <pre><code data-trim class="php">
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class CRMSubscriber implements EventSubscriberInterface {
-  protected $crmManager;
+class RegistrationMailer implements EventSubscriberInterface {
+  protected $mailManager;
+  protected $languageManager;
 
-  public function __construct($crmManager) {
-    $this->crmManager = $crmManager;
+  public function __construct(MailManagerInterface $mailManager, LanguageManagerInterface $languageManager) {
+    $this->mailManager = $mailManager;
+    $this->languageManager = $languageManager;
   };
 
   public static function getSubscribedEvents() {
-    $events['module_name.signup_form'][] = array('crmRegister', 0);
+    $events['module_name.signup_form'][] = array('onRegister', 0);
     return $events;
   }
 
-  public function crmRegister(SignupFormEvent $event) { ... }
+  public function onRegister(SignupFormEvent $event) { ... }
 }
             </code></pre>
           </section>
 
           <section>
             <pre><code data-trim class="php">
-public function crmRegister($event) {
-  $this->crmManager->subscribe($event->getName(), $event->getEmail());
+public function onRegister($event) {
+  $module = 'event_demo';
+  $key = 'register_interest';
+  $to = $event->getSubmittedEmail();
+  $params = ['name' => $event->getSubmittedName()];
+  $language = $this->languageManager->getDefaultLanguage();
+  $this->mailManager->mail($module, $key, $to, $language, $params);
 }
             </code></pre>
           </section>
+        </section>
+
+        <section data-background-video="formdemo.webm">
         </section>
 
         <section>
@@ -426,8 +436,7 @@ public function crmRegister($event) {
           </ul>
         </section>
 
-        <section>
-            Add video.
+        <section data-background-video="exception.webm">
         </section>
 
         <section>
