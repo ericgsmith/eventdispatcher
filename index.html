@@ -27,13 +27,20 @@
       <style>
           pre,
           code {
-              padding: 20px!important;
               width: 100%!important;
               margin: 0!important;
+          }
+          code {
+            padding: 20px!important;
           }
 
         li {
           white-space: nowrap;
+        }
+
+        img {
+          border: 0!important;
+          padding: 20px!important;
         }
       </style>
   </head>
@@ -61,11 +68,16 @@
                     <li>Sending an event</li>
                     <li>Responding to an event</li>
                 </ol>
+              <aside class="notes">
+                Timing, structure, detour etc.
+                </aside>
         </section>
 
 
         <section>
             <h2>Detour 1: About me</h2>
+          <img src="laserkiwi.png" style="padding: 0 !important;" /><br/>
+          <img src="logo.png" style="border:0; padding: 20px; background: white;" />
         </section>
 
         <section>
@@ -76,7 +88,7 @@
           <aside class="notes">
             Hook system - one of the first things we learn about drupal.
             A lot of invoked hooks are gone. Might be completely gone for D9.
-            replaced by the event dispatcher.
+            A lot have stayed. Some others replaced, plugins etc.
           </aside>
         </section>
 
@@ -95,20 +107,24 @@
             <section>
                 <h2>Events</h2>
                 <blockquote><p>Something happened</p></blockquote>
-                <aside class="notes">To see why its useful lets look at what we might have done</aside>
+                <aside class="notes">
+                  A form submitted, users logged in, web service called.
+                  To see why its useful lets look at what we might have done
+                </aside>
             </section>
 
           <section>
             <h2>What we might have done</h2>
             <p>We have a form that collects a name and email address.</p>
-            <ul>
+            <ul class="fragment">
               <li>Send an email to the user</li>
-                <li>Log the submission</li>
+              <li>Log the submission</li>
               <li>Add the user to our CRM</li>
               <li>Add the user to our newsletter</li>
               <li>Tweet their details to the company fridge</li>
             </ul>
               <aside class="notes">
+                We are doing a lot of things
                   .. and thats just what we know now that we want to do.
               </aside>
           </section>
@@ -131,16 +147,24 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
   $this->tweeter->tweet($tweet);
 }
 </code></pre>
+            <aside class="notes">
+              Fictional classes and methods - not commented
+            </aside>
           </section>
 
           <section>
-            <h2>This is bad</h2>
             <ul>
               <li>Submit method is doing too many things</li>
               <li>Form class knows too many things</li>
               <li>Hard to maintain</li>
               <li>Hard to reuse</li>
             </ul>
+            <aside class="notes">
+              Clarify this is opinionated.
+              Classes with well defined responsibilities are more flexible and
+              extendable. Form class now defines what the form is, and a whole
+              heap of actions when the form is submitted.
+            </aside>
           </section>
 
             <section>
@@ -155,23 +179,19 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
               Component - a bit of functionality we can use.
               Example of the mediator design pattern.
               Object the encapsulates the communication of other objects.
-
               Mediator promotes loose coupling by keeping objects from referring to each other explicitly
-
               Drupal is using ContainerAwareEventDispatcher
-
               3 step process - listen, notify, execute.
             </aside>
           </section>
-
-            <section>
-                <img src="after%20graph.svg" />
-            </section>
         </section>
 
         <section>
             <section>
-                <h2>Detour 2: Service container</h2>
+              <h2>Detour 2: Service container</h2>
+              <aside class="notes">
+                Before we use the ContainerAwareEventDispatcher, lets look at the container.
+              </aside>
             </section>
 
             <section>
@@ -184,7 +204,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 
           <section>
             <h2>Dependency Injection:</h2>
-            <p>Inject dependencies.</p>
+            <p class="fragment">Inject dependencies.</p>
           </section>
 
           <section>
@@ -195,6 +215,7 @@ public function myMethod() {
   $mailer->send('This is bad.');
 }
               </code></pre>
+            <aside class="notes">Tight coupling</aside>
           </section>
 
           <section>
@@ -210,6 +231,12 @@ public function myMethod() {
   $this->mailer->send('This is better.');
 }
             </code></pre>
+            <aside class="notes">
+              Class is constructed outside the object.
+              Injected through either constructor or setter method.
+              So, how do we get our object with all its dependencies created outside
+              of it.
+            </aside>
           </section>
 
             <section>
@@ -217,16 +244,20 @@ public function myMethod() {
               <div style="display: flex; flex-flow: row; justify-content: space-around;">
                 <div style="width:33%">
                   <h3>Configuration</h3>
-                  <img src="config.png" />
+                  <img src="config.png" style="padding:0!important;" />
                 </div>
                 <div style="width:33%">
-                  <h3>Magic</h3><img src="magic.gif" style="max-width: 100%;" />
+                  <h3>Magic</h3><img src="magic.gif" style="max-width: 100%; padding:0!important;" />
                 </div>
                 <div style="width:33%">
                   <h3>Service Container</h3>
-                  <img src="sc.svg" />
+                  <img src="sc.svg" style="padding:0!important;" />
                 </div>
               </div>
+              <aside class="notes">
+                Takes care of dependencies. Services are defined with their dependencies.
+                Container is the object that lets us get services.
+              </aside>
             </section>
         </section>
 
@@ -274,6 +305,12 @@ class SignupFormEvent extends Event {
   public function getSubmittedEmail() { return $this->submittedEmail; }
 }
             </code></pre>
+
+            <aside class="notes">
+              Extend the event class - it doesn't do a lot by itself. Just keeps
+              the event name and stopPropogation method that we will discuss later.
+              In our example we are not allowing data to be overridden, only notified.
+            </aside>
           </section>
 
           <section>
@@ -288,13 +325,17 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
   $this->eventDispatcher->dispatch(ExampleModuleEvents::SIGNUP_FORM_SUBMIT, $event);
 }
             </code></pre>
-            <aside class="notes"></aside>
+            <aside class="notes">Easy as that. But how do we get the event dispatcher?</aside>
           </section>
         </section>
 
         <section>
             <section>
                 <h2>Detour 3: Forms</h2>
+              <aside class="notes">
+                I wanted to take this detour as there is a bit of misinformation
+                about the service container online using the Drupal class.
+              </aside>
             </section>
             <section>
                 <h2>FormBase</h2>
@@ -302,6 +343,11 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
                     <li>Implements FormInterface</li>
                     <li>Implements ContainerInjectionInterface</li>
                 </ul>
+
+              <aside class="notes">
+                This is the class to extend from when creating custom forms.
+                This class has a container method that is private - so don't use it.
+              </aside>
             </section>
 
             <section>
@@ -311,6 +357,12 @@ public static function create(ContainerInterface $container) {
   return new static();
 }
             </code></pre>
+
+              <aside class="notes">
+                Not just for forms
+                Gives a common factory method for creation of objects with
+                dependencies in the service container.
+              </aside>
             </section>
 
             <section>
@@ -328,6 +380,11 @@ public static function create(ContainerInterface $container) {
   );
 }
             </code></pre>
+              <aside class="notes">
+                This is back on the form class.
+                We depend on the event dispatcher, so inject it as a dependency.
+                Can use getters and setters if you want
+              </aside>
             </section>
 
             <section>
@@ -363,6 +420,10 @@ services:
   tags:
     - { name: event_subscriber }
             </code></pre>
+            <aside class="notes">
+              The tag is how the container aware dispatcher will register our
+              listener.
+            </aside>
           </section>
 
           <section>
@@ -387,6 +448,12 @@ class RegistrationMailer implements EventSubscriberInterface {
   public function onRegister(SignupFormEvent $event) { ... }
 }
             </code></pre>
+            <aside class="notes">
+              getSubscribedEvents is called by the dispatcher, it is where
+              we tell it about the callback to use.
+              Mention priority here
+              Mention ability to subscribe multiple times
+            </aside>
           </section>
 
           <section>
@@ -400,6 +467,11 @@ public function onRegister($event) {
   $this->mailManager->mail($module, $key, $to, $language, $params);
 }
             </code></pre>
+            <aside class="notes">
+              This is just an expanded version of what we were doing in the
+              form submit - now in its own decoupled class.
+              Explain upcoming video.
+            </aside>
           </section>
         </section>
 
@@ -407,12 +479,25 @@ public function onRegister($event) {
         </section>
 
         <section>
+          <img src="after%20graph.svg" />
+          <aside class="notes">
+            Here is where we are now.
+            More classes, but they are silod. Easier to modifiy and extend.
+          </aside>
+        </section>
+
+        <section>
             <h2>Why is this good?</h2>
           <ul>
             <li>Single Responsibility Principle</li>
             <li>Open / Closed</li>
-            <li>Dependency Inversion</li>
           </ul>
+          <aside class="notes">
+            Classes are decoupled, more flexible.
+            Open for extension, closed for modification.
+            We no longer need to modify the form class to change what is happening
+            after the submission.
+          </aside>
         </section>
 
         <section>
@@ -424,6 +509,9 @@ public function onRegister($event) {
                 <li>hook_install</li>
                 <li>hook_preprocess</li>
             </ul>
+          <aside class="notes">
+            Lots of our old friends are still around.
+          </aside>
         </section>
 
         <section>
@@ -434,6 +522,39 @@ public function onRegister($event) {
             <li>KernelEvents::REQUEST, RESPONSE, TERMINATE..</li>
             <li>RoutingEvents::ALTER, DYNAMIC, ETC..</li>
           </ul>
+          <aside class="notes">
+            Not too many custom events, lets look at the kernel events more closely.
+          </aside>
+        </section>
+
+        <section>
+          <h2>Stopping an event</h2>
+            <pre><code data-trim class="php">
+$event->stopPropagation()
+            </code></pre>
+          <aside>
+            Sometimes, when a event can modify the data associated to it, it is
+            a good idea to stop the event.
+            This is the chain of responsibiliy - go through the observers until
+            we find an object that is responsible for this situation.
+          </aside>
+        </section>
+
+        <section>
+          <h2>Kernel Events</h2>
+          <ul>
+            <li class="fragment">kernel.request</li>
+            <li class="fragment">kernel.controller</li>
+            <li class="fragment">kernel.view</li>
+            <li class="fragment">kernel.response</li>
+            <li class="fragment">kernel.exception</li>
+            <li class="fragment">kernel.terminate</li>
+          </ul>
+          <aside class="notes">
+            gets a request. executes a controller. converts controller results
+            to a response. returns a response object.
+            Explain upcoming video on handling a 404 exception.
+          </aside>
         </section>
 
         <section data-background-video="exception.webm">
@@ -441,6 +562,7 @@ public function onRegister($event) {
 
         <section>
           <h2>Questions?</h2>
+          <img src="logo.png" style="border:0; padding: 20px; background: white;" />
           <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a></p>
         </section>
       </div>
