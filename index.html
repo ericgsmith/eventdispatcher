@@ -51,9 +51,6 @@
         <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
         <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a>
         </p>
-        <aside class="notes">
-          Intro / see how many people are using d8.
-        </aside>
       </section>
 
       <section>
@@ -94,7 +91,6 @@
         <aside class="notes">
           Hook system - one of the first things we learn about drupal.
           A lot of invoked hooks are gone. Might be completely gone for D9.
-          A lot have stayed. Some others replaced, plugins etc.
         </aside>
       </section>
       <section>
@@ -152,7 +148,6 @@
         <blockquote><p>Something happened</p></blockquote>
         <aside class="notes">
           A form submitted, users logged in, web service called.
-          To see why its useful lets look at what we might have done
         </aside>
       </section>
 
@@ -179,14 +174,7 @@
         <h2>Symfony Event Dispatcher</h2>
         <img src="gatwick.jpg"/>
         <aside class="notes">
-          A component - drupal is more modern and component based.
-          Component - a bit of functionality we can use.
-          Example of the mediator design pattern.
-          Object the encapsulates the communication of other objects.
-          Mediator promotes loose coupling by keeping objects from referring to
-          each other explicitly
-          Drupal is using ContainerAwareEventDispatcher
-          3 step process - listen, notify, execute.
+          Imagine an airport without a mediator...
         </aside>
       </section>
 
@@ -250,7 +238,7 @@
         </ul>
         <aside class="notes">
           Clarify this is opinionated.
-          Classes with well defined responsibilities are more flex ible and
+          Classes with well defined responsibilities are more flexible and
           extendable. Form class now defines what the form is, and a whole
           heap of actions when the form is submitted.
         </aside>
@@ -266,7 +254,7 @@
         <h2>Detour 2: Service container</h2>
         <aside class="notes">
           Before we use the ContainerAwareEventDispatcher, lets look at the
-          container.
+          container. Helps you instantiate, organize and retrieve the many objects of your application
         </aside>
       </section>
 
@@ -501,29 +489,12 @@
       <section>
         <h2>Listen for events</h2>
         <ul>
-          <li>Add to services.yaml</li>
           <li>Implement EventSubscriberInterface</li>
           <li>Implement getSubscribers method</li>
+          <li>Add to services.yaml</li>
         </ul>
         <aside class="notes">Now to recieve. Remember we are using the container
           aware dispatcher.
-        </aside>
-      </section>
-
-      <section>
-        <h2>services.yaml</h2>
-            <pre><code data-trim class="yaml">
-              services:
-              example_module.registration_mailer:
-              class:
-              "Drupal\example_crm_module\EventSubscriber\RegistrationMailer"
-              arguments: ["@plugin.manager.mail", "@language_manager"]
-              tags:
-              - { name: event_subscriber }
-            </code></pre>
-        <aside class="notes">
-          The tag is how the container aware dispatcher will register our
-          listener.
         </aside>
       </section>
 
@@ -543,7 +514,7 @@
               };
 
               public static function getSubscribedEvents() {
-              $events['module_name.signup_form'][] = array('onRegister', 0);
+              $events[ExampleModuleEvents::SIGNUP_FORM_SUBMIT][] = array('onRegister', 0);
               return $events;
               }
 
@@ -572,7 +543,24 @@
         <aside class="notes">
           This is just an expanded version of what we were doing in the
           form submit - now in its own decoupled class.
-          Explain upcoming video.
+        </aside>
+      </section>
+
+
+      <section>
+        <h2>services.yaml</h2>
+            <pre><code data-trim class="yaml">
+              services:
+              example_module.registration_mailer:
+              class:
+              "Drupal\example_crm_module\EventSubscriber\RegistrationMailer"
+              arguments: ["@plugin.manager.mail", "@language_manager"]
+              tags:
+              - { name: event_subscriber }
+            </code></pre>
+        <aside class="notes">
+          The tag is how the container aware dispatcher will register our
+          listener. Explain upcoming video.
         </aside>
       </section>
     </section>
