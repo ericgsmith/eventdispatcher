@@ -13,7 +13,8 @@
   <meta name="apple-mobile-web-app-status-bar-style"
         content="black-translucent">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
   <link rel="stylesheet" href="css/reveal.css">
   <link rel="stylesheet" href="css/theme/league.css" id="theme">
@@ -46,658 +47,678 @@
 <div class="reveal">
 
   <div class="slides">
+  <section>
     <section>
-      <section>
-        <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
-        <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a>
-        </p>
-      </section>
+      <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
 
-      <section>
-        <h2>C&W</h2>
-        <ul>
-          <li>Experience in Travel, Media, Publishing, Finance</li>
-          <li>Drupal specialists - Design, SEO, Content, Mobile</li>
-          <li>Team of 20 people</li>
-        </ul>
-        <div><img src="logo.png"
-                  style="border:0; padding: 20px; margin-top: 40px; background: white;"/>
-        </div>
-      </section>
-
-      <section>
-        <h2>C&W</h2>
-        <img src="clients.png" style="border:0; padding: 0;"/>
-      </section>
-
-    </section>
-
-    <section>
-      <h2>Agenda</h2>
-      <ol>
-        <li>Background</li>
-        <li>What is it & why it's useful</li>
-        <li>Creating / dispatching an event</li>
-        <li>Responding to an event</li>
-      </ol>
+      <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a>
+      </p>
       <aside class="notes">
-        Timing, structure, detour etc.
+        Adventure time!
       </aside>
     </section>
 
     <section>
-      <section>
-        <h2>Hooks</h2>
-        <aside class="notes">
-          Hook system - one of the first things we learn about drupal.
-          A lot of invoked hooks are gone. Might be completely gone for D9.
-        </aside>
-      </section>
-      <section>
-        <h2>Info Hooks</h2>
-        <ul>
-          <li style="text-decoration: line-through;">hook_block_info</li>
-          <li style="text-decoration: line-through;">hook_field_info</li>
-          <li style="text-decoration: line-through;">hook_filter_info</li>
-        </ul>
-        <aside class="notes">
-          Plugin system
-        </aside>
-      </section>
-      <section>
-        <h2>Hooks</h2>
-        <ul>
-          <li>hook_node_save</li>
-          <li>hook_help</li>
-          <li>hook_preprocess_...</li>
-        </ul>
-        <aside class="notes">
-          Some old friends still around.
-        </aside>
-      </section>
-
-      <section>
-        <h2>Invoked hooks</h2>
-        <ul>
-          <li style="text-decoration: line-through;">hook_boot</li>
-          <li style="text-decoration: line-through;">hook_init</li>
-          <li style="text-decoration: line-through;">hook_exit</li>
-        </ul>
-        <aside class="notes">
-          Gone! Use events instead.
-        </aside>
-      </section>
-
+      <h2>C&W</h2>
+      <ul>
+        <li>Experience in Travel, Media, Publishing, Finance</li>
+        <li>Drupal specialists - Design, SEO, Content, Mobile</li>
+        <li>Team of 20 people</li>
+      </ul>
+      <div><img src="logo.png"
+                style="border:0; padding: 20px; margin-top: 40px; background: white;"/>
+      </div>
+      <aside class="notes">
+        Also introduce yourself...
+      </aside>
     </section>
 
     <section>
-      <section>
-        <h2>Events</h2>
-        <blockquote cite="https://en.wikipedia.org/wiki/Event_(computing)">
-          <p>... an event is an action or occurrence recognised by software that
-            may be handled by the software.</p>
-        </blockquote>
-        <aside class="notes">
-          Think javascript. Responding to events is something we often do.
-          These events can be anything.
-        </aside>
-      </section>
+      <h2>C&W</h2>
+      <img src="clients.png" style="border:0; padding: 0;"/>
+    </section>
 
-      <section>
-        <h2>Events</h2>
-        <blockquote><p>Something happened</p></blockquote>
-        <aside class="notes">
-          A form submitted, users logged in, web service called.
-        </aside>
-      </section>
+  </section>
 
-      <section>
-        <h2>Event Dispatcher</h2>
-        <blockquote
+  <section>
+    <h2>Agenda</h2>
+    <ol>
+      <li>Background</li>
+      <li>What is it & why it's useful</li>
+      <li>Creating / dispatching an event</li>
+      <li>Responding to an event</li>
+    </ol>
+    <aside class="notes">
+      Timing, structure, detours as this is an adventure.
+    </aside>
+  </section>
+
+  <section>
+    <section>
+      <h2>Hooks</h2>
+      <aside class="notes">
+        Hook system - one of the first things we learn about drupal.
+        A lot of invoked hooks are gone. Might be completely gone for D9.
+      </aside>
+    </section>
+    <section>
+      <h2>Info Hooks</h2>
+      <ul>
+        <li style="text-decoration: line-through;">hook_block_info</li>
+        <li style="text-decoration: line-through;">hook_field_info</li>
+        <li style="text-decoration: line-through;">hook_filter_info</li>
+      </ul>
+      <aside class="notes">
+        Plugin system - ignoring this for today.
+      </aside>
+    </section>
+    <section>
+      <h2>Hooks</h2>
+      <ul>
+        <li>hook_node_save</li>
+        <li>hook_help</li>
+        <li>hook_preprocess_...</li>
+      </ul>
+      <aside class="notes">
+        Some old friends still around. We even have new hooks (reference Tassos' talk).
+        These might not be around forever...
+      </aside>
+    </section>
+
+    <section>
+      <h2>Invoked hooks</h2>
+      <ul>
+        <li style="text-decoration: line-through;">hook_boot</li>
+        <li style="text-decoration: line-through;">hook_init</li>
+        <li style="text-decoration: line-through;">hook_exit</li>
+      </ul>
+      <aside class="notes">
+        Gone! Use events instead.
+      </aside>
+    </section>
+
+  </section>
+
+  <section>
+    <section>
+      <h2>Events</h2>
+      <blockquote cite="https://en.wikipedia.org/wiki/Event_(computing)">
+        <p>... an event is an action or occurrence recognised by software that
+          may be handled by the software.</p>
+      </blockquote>
+      <aside class="notes">
+        Think javascript. Responding to events is something we often do.
+        These events can be anything.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Events</h2>
+      <blockquote><p>Something happened</p></blockquote>
+      <aside class="notes">
+        A form submitted, users logged in, web service called.
+        Refer back to boot, init, exit.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Event Dispatcher</h2>
+      <blockquote
           cite="http://symfony.com/doc/current/components/event_dispatcher/introduction.html">
-          <p>The EventDispatcher component provides tools that allow your
-            application components to communicate with each other by dispatching
-            events and listening to them.</p></blockquote>
-        <aside class="notes">
-          A component - drupal is more modern and component based.
-          Component - a bit of functionality we can use.
-          Example of the mediator design pattern.
-          Object the encapsulates the communication of other objects.
-          Mediator promotes loose coupling by keeping objects from referring to
-          each other explicitly
-          Drupal is using ContainerAwareEventDispatcher
-          3 step process - listen, notify, execute.
-        </aside>
-      </section>
-
-      <section>
-        <h2>Symfony Event Dispatcher</h2>
-        <img src="gatwick.jpg"/>
-        <aside class="notes">
-          Imagine an airport without a mediator...
-        </aside>
-      </section>
-
-      <section>
-        <h2>Symfony Event Dispatcher</h2>
-        <p>Add animation here.</p>
-      </section>
+        <p>The EventDispatcher component provides tools that allow your
+          application components to communicate with each other by dispatching
+          events and listening to them.</p></blockquote>
+      <aside class="notes">
+        A component - drupal is more modern and component based.
+        Component - a bit of functionality we can use.
+        Object the encapsulates the communication of other objects.
+        Example of the mediator design pattern.
+      </aside>
     </section>
 
     <section>
-      <section>
-        <h2>What we might have done</h2>
-        <p>We have a form that collects a name and email address.</p>
-        <ul class="fragment">
-          <li>Send an email to the user</li>
-          <li>Log the submission</li>
-          <li>Add the user to our CRM</li>
-          <li>Add the user to our newsletter</li>
-          <li>Tweet their details to the company fridge</li>
-        </ul>
-        <aside class="notes">
-          We are doing a lot of things
-          .. and thats just what we know now that we want to do.
-        </aside>
-      </section>
-
-      <section>
-            <pre><code data-trim class="php">
-              public function submitForm(array &$form, FormStateInterface
-              $form_state) {
-              $name = $form_state->getValue('name');
-              $email = $form_state->getValue('email');
-
-              $this->mailer->mail('example', 'signup_form', $email, .... ['name'
-              => $name]);
-
-              $this->logger->log('notice', 'Registration of interest
-              submitted...');
-
-              $this->crmManager->subscribe($name, $email);
-
-              $this->mailChimpSubscriptionManager->add($name, $email);
-
-              $tweet = TweetFactory::create('blah blah ' . $name . ' blah
-              blah');
-              $this->tweeter->tweet($tweet);
-              }
-            </code></pre>
-        <aside class="notes">
-          Fictional classes and methods - not commented
-        </aside>
-      </section>
-
-      <section>
-        <h2>Problems</h2>
-        <ul>
-          <li>Submit method is doing too many things</li>
-          <li>Form class knows too many things</li>
-          <li>Hard to maintain</li>
-          <li>Hard to reuse</li>
-        </ul>
-        <aside class="notes">
-          Clarify this is opinionated.
-          Classes with well defined responsibilities are more flexible and
-          extendable. Form class now defines what the form is, and a whole
-          heap of actions when the form is submitted.
-        </aside>
-      </section>
-
-      <section>
-        <img src="form%20dep%20graph.svg"/>
-      </section>
+      <h2>Symfony Event Dispatcher</h2>
+      <img src="gatwick.jpg"/>
+      <aside class="notes">
+        Imagine an airport without a mediator...
+        Mediator promotes loose coupling by keeping objects from referring to
+        each other explicitly
+        Drupal is using ContainerAwareEventDispatcher
+        3 step process - listen, notify, execute.
+      </aside>
     </section>
 
     <section>
-      <section>
-        <h2>Detour 2: Service container</h2>
-        <aside class="notes">
-          Before we use the ContainerAwareEventDispatcher, lets look at the
-          container. Helps you instantiate, organize and retrieve the many objects of your application
-        </aside>
-      </section>
+      <h2>Symfony Event Dispatcher</h2>
+      <img src="ed1.svg" class="stretch" />
+      <aside class="notes">
+        Objects communicate with it by sending and subscribing to events.
+        We will go into how to do this in the coming slides.
+      </aside>
+    </section>
 
-      <section>
-        <h2>Service:</h2>
-        <blockquote>
-          <p>Any PHP object that performs some sort of "global" task.</p>
-          <small><cite><a
+    <section data-transition="none">
+      <h2>Symfony Event Dispatcher</h2>
+      <img src="ed2.svg" class="stretch" />
+      <aside class="notes">
+        Create an event object.
+      </aside>
+    </section>
+
+    <section data-transition="none">
+      <h2>Symfony Event Dispatcher</h2>
+      <img src="ed3.svg" class="stretch" />
+    </section>
+  </section>
+
+  <section>
+    <section>
+      <h2>Use case</h2>
+
+      <p>We have a form that collects a name and email address.</p>
+      <ul class="fragment">
+        <li>Send an email to the user</li>
+        <li>Log the submission</li>
+        <li>Add the user to our CRM</li>
+        <li>Add the user to our newsletter</li>
+        <li>Tweet their details to the company fridge</li>
+      </ul>
+      <aside class="notes">
+        We are doing a lot of things
+        .. and thats just what we know now that we want to do.
+      </aside>
+    </section>
+
+    <section>
+      <h2>In a world without mediators</h2>
+              <pre><code data-trim class="php">
+public function submitForm(array &$form, FormStateInterface $form_state) {
+  $name = $form_state->getValue('name');
+  $email = $form_state->getValue('email');
+
+  $this->mailer->mail('example', 'signup_form', $email, .... ['name' => $name]);
+
+  $this->logger->log('notice', 'Registration of interest submitted...');
+
+  $this->crmManager->subscribe($name, $email);
+
+  $this->mailChimpSubscriptionManager->add($name, $email);
+
+  $tweet = TweetFactory::create('blah blah ' . $name . ' blah blah');
+  $this->tweeter->tweet($tweet);
+}
+              </code></pre>
+      <aside class="notes">
+        Fictional classes and methods.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Problems</h2>
+      <ul>
+        <li>Submit method is doing too many things</li>
+        <li>Form class knows too many things</li>
+        <li>Hard to maintain</li>
+        <li>Hard to reuse</li>
+      </ul>
+      <aside class="notes">
+        Clarify this is opinionated.
+        Classes with well defined responsibilities are more flexible and
+        extendable. Form class now <defi></defi>nes what the form is, and a whole
+        heap of actions when the form is submitted.
+      </aside>
+    </section>
+
+    <section>
+      <img src="form%20dep%20graph.svg"/>
+    </section>
+  </section>
+
+  <section>
+    <section>
+      <h2>Detour: Service container</h2>
+      <aside class="notes">
+        Before we go further, lets look at the
+        container. Helps you instantiate, organize and retrieve the many objects of your application
+      </aside>
+    </section>
+
+    <section>
+      <h2>Service:</h2>
+      <blockquote>
+        <p>Any PHP object that performs some sort of "global" task.</p>
+        <small><cite><a
             href="http://symfony.com/doc/current/book/service_container.html">http://symfony.com/doc/current/book/service_container.html</a></cite>
-          </small>
-        </blockquote>
-      </section>
-
-      <section>
-        <h2>Dependency Injection:</h2>
-        <p class="fragment">Inject dependencies.</p>
-      </section>
-
-      <section>
-        <h2>Not Dependency Injection:</h2>
-            <pre><code data-trim class="php">
-              public function myMethod() {
-              $mailer = new Mailhandler();
-              $mailer->send('This is bad.');
-              }
-            </code></pre>
-        <aside class="notes">Tight coupling</aside>
-      </section>
-
-      <section>
-        <h2>Dependency Injection:</h2>
-            <pre><code data-trim class="php">
-              protected $mailer;
-
-              public function __construct(MailHandlerInterface $mailer) {
-              $this->mailer = $mailer;
-              }
-
-              public function myMethod() {
-              $this->mailer->send('This is better.');
-              }
-            </code></pre>
-        <aside class="notes">
-          Class is constructed outside the object.
-          Injected through either constructor or setter method.
-          So, how do we get our object with all its dependencies created outside
-          of it.
-        </aside>
-      </section>
-
-      <section>
-        <h2>Step 1: Configuration</h2>
-        <img src="config.png" style="padding:0!important;"/>
-      </section>
-
-      <section>
-        <h2>Step 2: Magic</h2><img src="magic.gif"
-                                   style="max-width: 100%; padding:0!important;"/>
-      </section>
-
-      <section>
-        <h2>Step 3: Service Container</h2>
-        <img src="sc.svg" style="padding:0!important;"/>
-        <aside class="notes">
-          Takes care of dependencies. Services are defined with their
-          dependencies.
-          Container is the object that lets us get services.
-        </aside>
-      </section>
-
+        </small>
+      </blockquote>
     </section>
 
     <section>
-      <section>
-        <h2>Dispatching an event</h2>
-        <ol>
-          <li>Static event class</li>
-          <li>Extend the event class</li>
-          <li>Dispatch the event</li>
-        </ol>
-        <aside class="notes">You have a module, doing something, you want to
-          tell the world about it.
-          Maybe it needs to be altered. Maybe its your own code and you need to
-          keep it
-          clean and tidy.
-        </aside>
-      </section>
+      <h2>Dependency Injection:</h2>
 
-      <section>
-        <h2>The Static Events Class</h2>
-            <pre><code data-trim class="php">
-              final class ExampleModuleEvents {
-
-              /** docBlock */
-              const SIGNUP_FORM_SUBMIT = 'module_name.signup_form_submit';
-              }
-            </code></pre>
-        <aside class="notes">This doesn't do anything... Used for docs /
-          console. Remember how we had modulename.api
-        </aside>
-      </section>
-
-      <section>
-        <h2>Extend the event class</h2>
-            <pre><code data-trim class="php">
-              use Symfony\Component\EventDispatcher\Event;
-
-              class SignupFormEvent extends Event {
-
-              protected $submittedName;
-              protected $submittedEmail;
-
-              public function __construct($name, $email) {
-              $this->submittedName = $name;
-              $this->submittedEmail = $email;
-              }
-
-              public function getSubmittedName() { return $this->submittedName;
-              }
-              public function getSubmittedEmail() { return
-              $this->submittedEmail; }
-              }
-            </code></pre>
-
-        <aside class="notes">
-          Extend the event class - it doesn't do a lot by itself. Just keeps
-          the event name and stopPropogation method that we will discuss later.
-          In our example we are not allowing data to be overridden, only
-          notified.
-        </aside>
-      </section>
-
-      <section>
-        <h2>Dispatch the event</h2>
-            <pre><code data-trim class="php">
-              public function submitForm(array &$form, FormStateInterface
-              $form_state) {
-              $name = $form_state->getValue('name');
-              $email = $form_state->getValue('email');
-
-              $event = new SignupFormEvent($name, $email);
-
-              $this->eventDispatcher->dispatch(ExampleModuleEvents::SIGNUP_FORM_SUBMIT,
-              $event);
-              }
-            </code></pre>
-        <aside class="notes">Easy as that. But how do we get the event
-          dispatcher?
-        </aside>
-      </section>
-
-      <section>
-        Add updated dependency graph.
-      </section>
+      <p class="fragment">Inject dependencies.</p>
     </section>
 
     <section>
-      <section>
-        <h2>Detour 3: Forms</h2>
-        <aside class="notes">
-          I wanted to take this detour as there is a bit of misinformation
-          about the service container online using the Drupal class.
-        </aside>
-      </section>
-      <section>
-        <h2>FormBase</h2>
-        <ul>
-          <li>Implements FormInterface</li>
-          <li>Implements ContainerInjectionInterface</li>
-        </ul>
-
-        <aside class="notes">
-          This is the class to extend from when creating custom forms.
-          This class has a container method that is private - so don't use it.
-        </aside>
-      </section>
-
-      <section>
-        <h2>ContainerInjectionInterface</h2>
-            <pre><code data-trim class="php">
-              public static function create(ContainerInterface $container) {
-              return new static();
-              }
-            </code></pre>
-
-        <aside class="notes">
-          Not just for forms
-          Gives a common factory method for creation of objects with
-          dependencies in the service container.
-        </aside>
-      </section>
-
-      <section>
-        <h2>ContainerInjectionInterface</h2>
-            <pre><code data-trim class="php">
-              protected $eventDispatcher;
-
-              public function __construct(EventDispatcherInterface
-              $eventDispatcher) {
-              $this->eventDispatcher = $eventDispatcher;
-              }
-
-              public static function create(ContainerInterface $container) {
-              return new static(
-              $container->get('event_dispatcher')
-              );
-              }
-            </code></pre>
-        <aside class="notes">
-          This is back on the form class.
-          We depend on the event dispatcher, so inject it as a dependency.
-          Can use getters and setters if you want
-        </aside>
-      </section>
-
-      <section>
-        <h2>FormInterface</h2>
-            <pre><code data-trim class="php">
-              public function buildForm(array $form, FormStateInterface
-              $form_state);
-
-              public function validateForm(array &$form, FormStateInterface
-              $form_state);
-
-              public function submitForm(array &$form, FormStateInterface
-              $form_state);
-            </code></pre>
-      </section>
+      <h2>Not Dependency Injection:</h2>
+              <pre><code data-trim class="php">
+public function myMethod() {
+  $mailer = new Mailhandler();
+  $mailer->send('This is bad.');
+}
+              </code></pre>
+      <aside class="notes">Tight coupling</aside>
     </section>
 
     <section>
-      <section>
-        <h2>Listen for events</h2>
-        <ul>
-          <li>Implement EventSubscriberInterface</li>
-          <li>Implement getSubscribers method</li>
-          <li>Add to services.yaml</li>
-        </ul>
-        <aside class="notes">Now to recieve. Remember we are using the container
-          aware dispatcher.
-        </aside>
-      </section>
+      <h2>Dependency Injection:</h2>
+              <pre><code data-trim class="php">
+protected $mailer;
 
-      <section>
-        <h2>Implement EventSubscriberInterface</h2>
-            <pre><code data-trim class="php">
-              use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+public function __construct(MailHandlerInterface $mailer) {
+  $this->mailer = $mailer;
+}
 
-              class RegistrationMailer implements EventSubscriberInterface {
-              protected $mailManager;
-              protected $languageManager;
-
-              public function __construct(MailManagerInterface $mailManager,
-              LanguageManagerInterface $languageManager) {
-              $this->mailManager = $mailManager;
-              $this->languageManager = $languageManager;
-              };
-
-              public static function getSubscribedEvents() {
-              $events[ExampleModuleEvents::SIGNUP_FORM_SUBMIT][] = array('onRegister', 0);
-              return $events;
-              }
-
-              public function onRegister(SignupFormEvent $event) { ... }
-              }
-            </code></pre>
-        <aside class="notes">
-          getSubscribedEvents is called by the dispatcher, it is where
-          we tell it about the callback to use.
-          Mention priority here
-          Mention ability to subscribe multiple times
-        </aside>
-      </section>
-
-      <section>
-            <pre><code data-trim class="php">
-              public function onRegister($event) {
-              $module = 'event_demo';
-              $key = 'register_interest';
-              $to = $event->getSubmittedEmail();
-              $params = ['name' => $event->getSubmittedName()];
-              $language = $this->languageManager->getDefaultLanguage();
-              $this->mailManager->mail($module, $key, $to, $language, $params);
-              }
-            </code></pre>
-        <aside class="notes">
-          This is just an expanded version of what we were doing in the
-          form submit - now in its own decoupled class.
-        </aside>
-      </section>
-
-
-      <section>
-        <h2>services.yaml</h2>
-            <pre><code data-trim class="yaml">
-              services:
-              example_module.registration_mailer:
-              class:
-              "Drupal\example_crm_module\EventSubscriber\RegistrationMailer"
-              arguments: ["@plugin.manager.mail", "@language_manager"]
-              tags:
-              - { name: event_subscriber }
-            </code></pre>
-        <aside class="notes">
-          The tag is how the container aware dispatcher will register our
-          listener. Explain upcoming video.
-        </aside>
-      </section>
-    </section>
-
-    <section data-background-video="formdemo.webm">
+public function myMethod() {
+  $this->mailer->send('This is better.');
+}
+              </code></pre>
+      <aside class="notes">
+        Class is constructed outside the object.
+        Injected through either constructor or setter method.
+        So, how do we get our object with all its dependencies created outside
+        of it.
+      </aside>
     </section>
 
     <section>
-      <section>
-        <img src="after%20graph.svg"/>
-        <aside class="notes">
-          Here is where we are now.
-          More classes, but they are silod. Easier to modifiy and extend.
-        </aside>
-      </section>
-
-      <section>
-        <h2>Why is this good?</h2>
-        <ul>
-          <li>Single Responsibility Principle</li>
-          <li>Open / Closed</li>
-          <li>Decoupled Modular Code</li>
-          <li>Testable</li>
-        </ul>
-        <aside class="notes">
-          Classes are decoupled, more flexible.
-          Open for extension, closed for modification.
-          We no longer need to modify the form class to change what is happening
-          after the submission.
-        </aside>
-      </section>
-
-      <section>
-        <h2>Why is this better than hooks?</h2>
-        <ul>
-          <li>Control</li>
-          <li>External Compontents</li>
-        </ul>
-        <aside class="notes">
-
-        </aside>
-      </section>
-
-      <section>
-        <h2>Stopping an event</h2>
-            <pre><code data-trim class="php">
-              $event->stopPropagation()
-            </code></pre>
-        <aside class="notes">
-          Sometimes, when a event can modify the data associated to it, it is
-          a good idea to stop the event.
-          This is the chain of responsibiliy - go through the observers until
-          we find an object that is responsible for this situation.
-        </aside>
-      </section>
+      <h2>Step 1: Configuration</h2>
+      <img src="config.png" style="padding:0!important;" class="stretch"/>
     </section>
 
     <section>
-
-      <section>
-        <h2>What is Core doing...</h2>
-        <ul>
-          <li>hook_entity_save, delete, etc</li>
-          <li>hook_block_view, etc</li>
-          <li>hook_cron</li>
-          <li>hook_install</li>
-          <li>hook_preprocess</li>
-        </ul>
-        <aside class="notes">
-          Lots of our old friends are still around.
-        </aside>
-      </section>
-
-      <section>
-        <h2>What is Core doing...</h2>
-        <ul>
-          <li>ConfigEvents::DELETE, IMPORT, SAVE..</li>
-          <li>EntityTypeEvents::CREATE, UPDATE, DELETE..</li>
-          <li>KernelEvents::REQUEST, RESPONSE, TERMINATE..</li>
-          <li>RoutingEvents::ALTER, DYNAMIC, ETC..</li>
-        </ul>
-        <aside class="notes">
-          Not too many custom events, lets look at the kernel events more
-          closely.
-        </aside>
-      </section>
-
-      <section>
-        <h2>Kernel Events</h2>
-        <ul>
-          <li class="fragment">kernel.request</li>
-          <li class="fragment">kernel.controller</li>
-          <li class="fragment">kernel.view</li>
-          <li class="fragment">kernel.response</li>
-          <li class="fragment">kernel.exception</li>
-          <li class="fragment">kernel.terminate</li>
-        </ul>
-        <aside class="notes">
-          gets a request. executes a controller. converts controller results
-          to a response. returns a response object.
-          Explain upcoming video on handling a 404 exception.
-        </aside>
-      </section>
-
-      <section>
-        <h2>kernel.exception</h2>
-      </section>
-
-      <section>
-        <h2>Fast 404 listener</h2>
-      </section>
-
-      <section data-background-video="exception.webm">
-      </section>
+      <h2>Step 2: Magic</h2><img src="magic.gif"
+                                 style="padding:0!important;" class="stretch"/>
     </section>
 
     <section>
-      <section>
-        <h2>The Future</h2>
-        <ul>
-          <li>Pre / Post events for all the things... Maybe?</li>
-        </ul>
+      <h2>Step 3: Service Container</h2>
+      <img src="sc.svg" style="padding:0!important;" class="stretch"/>
+      <aside class="notes">
+        Takes care of dependencies. Services are defined with their
+        dependencies.
+        Container is the object that lets us get services.
+        We can reach in and grab what we want, and not worry about what that object needs.
+      </aside>
+    </section>
 
-        <h2>Rules module</h2>
-        <ul>
-          <li>Works with events</li>
-          <li>Adds events for many core hooks</li>
-        </ul>
-      </section>
+  </section>
+
+  <section>
+    <section>
+      <h2>Dispatching an event</h2>
+      <ol>
+        <li>Static event class</li>
+        <li>Extend the event class</li>
+        <li>Dispatch the event</li>
+      </ol>
+      <aside class="notes">You have a module, doing something, you want to
+        tell the world about it.
+        Maybe it needs to be altered. Maybe its your own code and you need to
+        keep it
+        clean and tidy.
+      </aside>
     </section>
 
     <section>
-      <h2>Questions?</h2>
-      <img src="logo.png" style="border:0; padding: 20px; background: white;"/>
-      <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a>
-      </p>
+      <h2>The Static Events Class</h2>
+              <pre><code data-trim class="php">
+final class ExampleModuleEvents {
+
+  /** docBlock */
+  const SIGNUP_FORM_SUBMIT = 'module_name.signup_form_submit';
+}
+              </code></pre>
+      <aside class="notes">This doesn't do anything... Used for docs /
+        console. Remember how we had modulename.api
+      </aside>
     </section>
+
+    <section>
+      <h2>Extend the event class</h2>
+              <pre><code data-trim class="php">
+use Symfony\Component\EventDispatcher\Event;
+
+class SignupFormEvent extends Event {
+
+  protected $submittedName;
+  protected $submittedEmail;
+
+  public function __construct($name, $email) {
+    $this->submittedName = $name;
+    $this->submittedEmail = $email;
+  }
+
+  public function getSubmittedName() {
+    return $this->submittedName;
+  }
+
+  public function getSubmittedEmail() { return
+    $this->submittedEmail;
+  }
+}
+              </code></pre>
+
+      <aside class="notes">
+        This is the object we will create and pass around. It has the data we want to share.
+        Extend the event class - it doesn't do a lot by itself. Just keeps
+        the event name and stopPropogation method that we will discuss later.
+        In our example we are not allowing data to be overridden, only
+        notified.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Dispatch the event</h2>
+              <pre><code data-trim class="php">
+public function submitForm(array &$form, FormStateInterface $form_state) {
+  $name = $form_state->getValue('name');
+  $email = $form_state->getValue('email');
+
+  $event = new SignupFormEvent($name, $email);
+
+  $this->eventDispatcher->dispatch(ExampleModuleEvents::SIGNUP_FORM_SUBMIT, $event);
+}
+              </code></pre>
+      <aside class="notes">Easy as that. But how do we get the event
+        dispatcher?
+      </aside>
+    </section>
+
+  </section>
+
+  <section>
+    <section>
+      <h2>Detour: Forms</h2>
+      <aside class="notes">
+        I wanted to take this detour as there is a bit of misinformation
+        about the service container online using the Drupal class.
+      </aside>
+    </section>
+    <section>
+      <h2>FormBase</h2>
+      <ul>
+        <li>Implements FormInterface</li>
+        <li>Implements ContainerInjectionInterface</li>
+      </ul>
+
+      <aside class="notes">
+        This is the class to extend from when creating custom forms.
+        This class has a container method that is private - so don't use it.
+      </aside>
+    </section>
+
+    <section>
+      <h2>ContainerInjectionInterface</h2>
+              <pre><code data-trim class="php">
+public static function create(ContainerInterface $container) {
+  return new static();
+}
+              </code></pre>
+
+      <aside class="notes">
+        Not just for forms
+        Gives a common factory method for creation of objects with
+        dependencies in the service container.
+      </aside>
+    </section>
+
+    <section>
+      <h2>ContainerInjectionInterface</h2>
+              <pre><code data-trim class="php">
+protected $eventDispatcher;
+
+public function __construct(EventDispatcherInterface $eventDispatcher) {
+  $this->eventDispatcher = $eventDispatcher;
+}
+
+public static function create(ContainerInterface $container) {
+  return new static($container->get('event_dispatcher'));
+}
+              </code></pre>
+      <aside class="notes">
+        This is back on the form class.
+        We depend on the event dispatcher, so inject it as a dependency.
+        Can use getters and setters if you want
+      </aside>
+    </section>
+
+    <section>
+      <h2>FormInterface</h2>
+              <pre><code data-trim class="php">
+public function buildForm(array $form, FormStateInterface $form_state);
+
+public function validateForm(array &$form, FormStateInterface $form_state);
+
+public function submitForm(array &$form, FormStateInterface $form_state);
+              </code></pre>
+    </section>
+  </section>
+
+  <section>
+    <section>
+      <h2>Listen for events</h2>
+      <ul>
+        <li>Implement EventSubscriberInterface</li>
+        <li>Implement getSubscribers method</li>
+        <li>Add to services.yaml</li>
+      </ul>
+      <aside class="notes">Now to recieve. Remember we are using the container
+        aware dispatcher.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Implement EventSubscriberInterface</h2>
+              <pre><code data-trim class="php">
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class RegistrationMailer implements EventSubscriberInterface {
+  protected $mailManager;
+  protected $languageManager;
+
+  public function __construct(MailManagerInterface $mailManager, LanguageManagerInterface $languageManager) {
+    $this->mailManager = $mailManager;
+    $this->languageManager = $languageManager;
+  };
+
+  public static function getSubscribedEvents() {
+    $events[ExampleModuleEvents::SIGNUP_FORM_SUBMIT][] = array('onRegister', 0);
+    return $events;
+  }
+
+  public function onRegister(SignupFormEvent $event) { ... }
+}
+              </code></pre>
+      <aside class="notes">
+        Mention priority here
+        Mention ability to subscribe multiple times
+        getSubscribedEvents is called by the dispatcher, it is where
+        we tell it about the callback to use.
+      </aside>
+    </section>
+
+    <section>
+              <pre><code data-trim class="php">
+public function onRegister($event) {
+  $module = 'event_demo';
+  $key = 'register_interest';
+  $to = $event->getSubmittedEmail();
+  $params = ['name' => $event->getSubmittedName()];
+  $language = $this->languageManager->getDefaultLanguage();
+  $this->mailManager->mail($module, $key, $to, $language, $params);
+}
+              </code></pre>
+      <aside class="notes">
+        This is just an expanded version of what we were doing in the
+        form submit - now in its own decoupled class.
+      </aside>
+    </section>
+
+
+    <section>
+      <h2>services.yaml</h2>
+              <pre><code data-trim class="yaml">
+services:
+  example_module.registration_mailer:
+    class: "Drupal\example_crm_module\EventSubscriber\RegistrationMailer"
+    arguments: ["@plugin.manager.mail", "@language_manager"]
+    tags:
+      - { name: event_subscriber }
+              </code></pre>
+      <aside class="notes">
+        The tag is how the container aware dispatcher will register our
+        listener. Explain upcoming video.
+      </aside>
+    </section>
+  </section>
+
+  <section data-background-video="formdemo.webm">
+  </section>
+
+  <section>
+    <section>
+      <img src="after%20graph.svg"/>
+      <aside class="notes">
+        Here is where we are now.
+        More classes, but they are silod. Easier to modifiy and extend.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Why is this good?</h2>
+      <ul>
+        <li>Single Responsibility Principle</li>
+        <li>Open / Closed</li>
+        <li>Decoupled Modular Code</li>
+        <li>Testable</li>
+      </ul>
+      <aside class="notes">
+        Classes are decoupled, more flexible.
+        Open for extension, closed for modification.
+        We no longer need to modify the form class to change what is happening
+        after the submission.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Why is this better than hooks?</h2>
+      <ul>
+        <li>Control</li>
+        <li>External Components</li>
+      </ul>
+      <aside class="notes">
+        We saw the example of weight / order. This is a lot nicer that module implements alters.
+        We also have even more control (chaos?) by stopping events.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Stopping an event</h2>
+              <pre><code data-trim class="php">
+                $event->stopPropagation()
+              </code></pre>
+      <aside class="notes">
+        Sometimes, when a event can modify the data associated to it, it is
+        a good idea to stop the event.
+        This is the chain of responsibiliy - go through the observers until
+        we find an object that is responsible for this situation.
+      </aside>
+    </section>
+  </section>
+
+  <section>
+
+    <section>
+      <h2>What is Core doing...</h2>
+      <ul>
+        <li>ConfigEvents::DELETE, IMPORT, SAVE..</li>
+        <li>EntityTypeEvents::CREATE, UPDATE, DELETE..</li>
+        <li>KernelEvents::REQUEST, RESPONSE, TERMINATE..</li>
+        <li>RoutingEvents::ALTER, DYNAMIC, ETC..</li>
+      </ul>
+      <aside class="notes">
+        Not too many custom events, lets look at the kernel events more
+        closely.
+      </aside>
+    </section>
+
+    <section>
+      <h2>Kernel Events</h2>
+      <ul>
+        <li class="fragment">kernel.request</li>
+        <li class="fragment">kernel.controller</li>
+        <li class="fragment">kernel.view</li>
+        <li class="fragment">kernel.response</li>
+        <li class="fragment">kernel.exception</li>
+        <li class="fragment">kernel.terminate</li>
+      </ul>
+      <aside class="notes">
+        gets a request. executes a controller. converts controller results
+        to a response. returns a response object.
+        Explain upcoming video on handling a 404 exception.
+      </aside>
+    </section>
+
+    <section>
+      <h2>kernel.exception</h2>
+    </section>
+
+    <section>
+      <h2>Fast 404 listener</h2>
+    </section>
+
+    <section data-background-video="exception.webm">
+    </section>
+  </section>
+
+  <section>
+    <section>
+      <h2>The Future</h2>
+      <ul>
+        <li>Pre / Post events for all the things... Maybe?</li>
+      </ul>
+      </section><section>
+
+      <h2>Rules module</h2>
+      <ul>
+        <li>Works with events</li>
+        <li>Adds events for many core hooks</li>
+      </ul>
+    </section>
+    <section>
+      <pre><code data-trim class="php">
+/**
+ * Implements hook_user_login().
+ */
+function rules_user_login($account) {
+  // Set the account twice on the event: as the main subject but also in the
+  // list of arguments.
+  $event = new UserLoginEvent($account);
+  $event_dispatcher = \Drupal::service('event_dispatcher');
+  $event_dispatcher->dispatch(UserLoginEvent::EVENT_NAME, $event);
+}
+      </code></pre>
+    </section>
+  </section>
+
+  <section>
+    <h2>Questions?</h2>
+    <img src="logo.png" style="border:0; padding: 20px; background: white;"/>
+
+    <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a>
+    </p>
+  </section>
   </div>
 
 </div>
