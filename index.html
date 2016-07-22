@@ -39,6 +39,16 @@
       border: 0 !important;
       padding: 20px !important;
     }
+
+    body:before {
+      content: "@ericgsmith | @cameronwilding";
+      position: absolute;
+      left: 20px;
+      bottom: 40px;
+      color: #13DAEC;
+      font-family: "Lato", sans-serif;
+      font-size: 1.6em;
+    }
   </style>
 </head>
 
@@ -51,7 +61,8 @@
     <section>
       <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
 
-      <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a>
+      <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a> / <a href="http://twitter.com/cameronwilding">@cameronwilding</a><br>
+        <a href="http://ericgsmith.github.io/eventdispatcher">http://ericgsmith.github.io/eventdispatcher</a>
       </p>
       <aside class="notes">
         Adventure time!
@@ -59,11 +70,9 @@
     </section>
 
     <section>
-      <h2>C&W</h2>
+      <h2>Me</h2>
       <ul>
-        <li>Experience in Travel, Media, Publishing, Finance</li>
-        <li>Drupal specialists - Design, SEO, Content, Mobile</li>
-        <li>Team of 20 people</li>
+        <li>Drupal Developer at</li>
       </ul>
       <div><img src="logo.png"
                 style="border:0; padding: 20px; margin-top: 40px; background: white;"/>
@@ -71,11 +80,6 @@
       <aside class="notes">
         Also introduce yourself...
       </aside>
-    </section>
-
-    <section>
-      <h2>C&W</h2>
-      <img src="clients.png" style="border:0; padding: 0;"/>
     </section>
 
   </section>
@@ -672,10 +676,34 @@ services:
 
     <section>
       <h2>kernel.exception</h2>
+      <blockquote>
+        This event allows you to create a response for a thrown exception or
+        to modify the thrown exception. The event listener method receives
+        a ...\GetResponseForExceptionEvent instance.
+      </blockquote>
     </section>
 
     <section>
       <h2>Fast 404 listener</h2>
+    </section>
+
+    <section>
+      <h2>Fast 404 listener</h2>
+      <pre><code data-trim class="yaml">
+$request = $event->getRequest();
+
+$config = $this->configFactory->get('system.performance');
+$exclude_paths = $config->get('fast_404.exclude_paths');
+if ($config->get('fast_404.enabled') && $exclude_paths && !preg_match($exclude_paths, $request->getPathInfo())) {
+  $fast_paths = $config->get('fast_404.paths');
+    if ($fast_paths && preg_match($fast_paths, $request->getPathInfo())) {
+      $fast_404_html = strtr($config->get('fast_404.html'), ['@path' => Html::escape($request->getUri())]);
+      $response = new Response($fast_404_html, Response::HTTP_NOT_FOUND);
+      $event->setResponse($response);
+    }
+  }
+}
+      </code></pre>
     </section>
 
     <section data-background-video="exception.webm">
@@ -716,7 +744,7 @@ function rules_user_login($account) {
     <h2>Questions?</h2>
     <img src="logo.png" style="border:0; padding: 20px; background: white;"/>
 
-    <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a>
+    <p>Eric Smith / <a href="http://twitter.com/ericgsmith">@ericgsmith</a> / <a href="http://twitter.com/cameronwilding">@cameronwilding</a>
     </p>
   </section>
   </div>
