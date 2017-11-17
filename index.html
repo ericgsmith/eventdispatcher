@@ -52,12 +52,8 @@
 
   <div class="slides">
   <section>
-    <section>
-      <h1>Drupal 8 and the Symfony Event Dispatcher</h1>
+    <section data-background-image="cover.png">
 
-      <p><a href="https://twitter.com/ericgsmith">@ericgsmith</a><br>
-        <a href="https://ericgsmith.github.io/eventdispatcher">https://ericgsmith.github.io/eventdispatcher</a>
-      </p>
       <aside class="notes">
 
       </aside>
@@ -73,20 +69,12 @@
       <li>Responding to an event</li>
       <li>Workflow of a request</li>
     </ol>
-    <aside class="notes"></aside>
+    <aside class="notes">
+
+    </aside>
   </section>
 
   <section>
-    <section data-transition="fade">
-      <h2>Event</h2>
-      <blockquote cite="https://en.wikipedia.org/wiki/Event_(computing)">
-        <p>thing that happens or takes place, especially one of importance.</p>
-        <small><cite>The New Zealand Pocket Oxford Dictionary</cite>
-        </small>
-      </blockquote>
-      <aside class="notes">
-      </aside>
-    </section>
     <section data-transition="fade">
       <h2>Event</h2>
       <blockquote cite="https://en.wikipedia.org/wiki/Event_(computing)">
@@ -101,21 +89,27 @@
 
     <section data-transition="fade">
       <h2>Event</h2>
-      <blockquote>
-        <p>Something happened<span class="fragment">, so something else might happen</span>
-          <span class="fragment">, and we know about it.</span>
-        </p>
-      <small class="fragment">Me</small></blockquote>
+      <blockquote cite="https://en.wikipedia.org/wiki/Event_(computing)">
+        <p>thing that happens or takes place, especially one of importance.</p>
+        <small><cite>The NZ Pocket Oxford Dictionary</cite>
+        </small>
+      </blockquote>
       <aside class="notes">
-
+        From prev slide - "that may be handled by the software"
       </aside>
     </section>
 
     <section>
       <h1>Lots of things happen in an application</h1>
       <aside class="notes">
-        Nodes saved, forms validated, files requested, users logging in, records in other systems updated.
-        All these things and more can be events if we choose. We have to power to label something an event.
+        Nodes saved, forms validated, files requested, users logging in, APIs called.
+
+        All these things and more can be events if we choose.
+
+        We have to power to label something an event.
+      </aside>
+      <aside class="notes">
+        From dictionary - especially one of importance
       </aside>
     </section>
 
@@ -155,21 +149,11 @@ jQuery('#eric').click(function (event) {
         <small><cite><a href="https://symfony.com/doc/current/components/event_dispatcher.html">https://symfony.com/doc/current/components/event_dispatcher.html</a></cite></small>
       </blockquote>
       <aside class="notes">
-        Provides the communication route for translating something happened, and something might happen.
-        Component - a bit of functionality we can use.
-        Object responsible for the communication of other objects.
-        Example of the mediator design pattern.
-      </aside>
-    </section>
+        Facilitates the communication between objects for translating something happened and anything that might happen.
 
-    <section>
-      <h2>Event Dispatcher</h2>
-      <img src="auckland.jpg" class="stretch"/><br>
-      <small><cite><a href="http://www.radionz.co.nz/">Photo: 123RF - http://www.radionz.co.nz/</a></cite></small>
-      <aside class="notes">
-        Imagine an airport without a mediator...
-        Mediator promotes loose coupling by keeping objects from referring to
-        each other explicitly
+        Example of the mediator design pattern. It can be problem to have all components talking to each other.
+
+        It promotes loose coupling of your classes.
       </aside>
     </section>
 
@@ -214,10 +198,10 @@ jQuery('#eric').click(function (event) {
 
       <ul class="fragment">
         <li>Log the submission</li>
-        <li class="fragment">Send an email to the user</li>
-        <li class="fragment">Add the user to our CRM</li>
-        <li class="fragment">Post to slack</li>
-        <li class="fragment">Calculate if the user gets prize</li>
+        <li>Send an email to the user</li>
+        <li>Add the user to our CRM</li>
+        <li>Post to slack</li>
+        <li>Calculate if the user gets prize</li>
       </ul>
       <aside class="notes">
         We are doing a lot of things
@@ -236,12 +220,11 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 }
               </code></pre>
       <aside class="notes">
-        Fictional classes and methods.
       </aside>
     </section>
 
     <section>
-      <h2>Add our first behaviour</h2>
+      <h2>Add another thing</h2>
               <pre><code data-trim class="php">
 public function submitForm(array &$form, FormStateInterface $form_state) {
   $name = $form_state->getValue('name');
@@ -259,7 +242,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
     </section>
 
     <section>
-      <h2>Add dependencies</h2>
+      <h2>Add dependencies for the thing</h2>
               <pre><code data-trim class="php">
 public function create(ContainerInterface $container) {
   $form = new static();
@@ -269,7 +252,6 @@ public function create(ContainerInterface $container) {
 }
               </code></pre>
       <aside class="notes">
-        Fictional classes and methods.
       </aside>
     </section>
 
@@ -296,7 +278,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 }
               </code></pre>
       <aside class="notes">
-        Fictional classes and methods.
+
       </aside>
     </section>
 
@@ -331,6 +313,8 @@ public function create(ContainerInterface $container) {
         <li>Hard to reuse</li>
       </ul>
       <aside class="notes">
+        Personification is the most sustainable system.
+        Build systems that are easy to make small changes to.
         Clarify this is opinionated.
         Classes with well defined responsibilities are more flexible and
         extendable. Form class now defines what the form is, and a whole
@@ -377,7 +361,7 @@ public function create(ContainerInterface $container) {
     </section>
 
     <section>
-      <h2>The Static Events Class</h2>
+      <h2>Documentation</h2>
               <pre><code data-trim class="php">
 final class ExampleModuleEvents {
 
@@ -385,7 +369,7 @@ final class ExampleModuleEvents {
   const SIGNUP_FORM_SUBMIT = 'module_name.signup_form_submit';
 }
               </code></pre>
-      <aside class="notes">This doesn't do anything... Used for docs /
+      <aside class="notes">Used for docs /
         console. Remember how we had modulename.api
       </aside>
     </section>
@@ -424,7 +408,7 @@ class SignupFormEvent extends Event {
       </aside>
     </section>
 
-    <section>
+    <section data-transition="fade">
       <h2>Back to the form</h2>
               <pre><code data-trim class="php">
 public function create(ContainerInterface $container) {
@@ -438,31 +422,16 @@ public function create(ContainerInterface $container) {
 }
               </code></pre>
       <aside class="notes">
-        Fictional classes and methods.
       </aside>
     </section>
 
-    <section>
+    <section data-transition="fade">
       <h2>Inject the event dispatcher into the form</h2>
               <pre><code data-trim class="php">
 public function create(ContainerInterface $container) {
   $form = new static();
   $form->setEventDispatcher($container->get('event_dispatcher'));
   return $form;
-}
-              </code></pre>
-      <aside class="notes">
-        Fictional classes and methods.
-      </aside>
-    </section>
-
-    <section>
-      <h2>Form</h2>
-              <pre><code data-trim class="php">
-protected $eventDispatcher;
-
-public function setEventDispatcher(EventDispatcherInterface $eventDispatcher) {
-  $this->eventDispatcher = $eventDispatcher;
 }
               </code></pre>
       <aside class="notes">
@@ -507,7 +476,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 
   <section>
     <section>
-      <h1>Listening for events</h1>
+      <h1>Subscribing to events</h1>
       <aside class="notes">
         More frequent than dispatching.
         The first thing we need is a class to left the ED know what events we care about, and what
@@ -526,8 +495,8 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class RegistrationMailer implements EventSubscriberInterface {
+  protected $mailManager;
   protected $currentUser;
-  protected $languageManager;
 
   public function __construct(MailManagerInterface $mailManager, AccountProxyInterface $currentUser) {
     $this->mailManager = $mailManager;
